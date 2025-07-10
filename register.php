@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register | IT Help Desk</title>
+    <title>Register | IT Help Request Tracker</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -41,14 +41,14 @@
 
         /* auth-container now has a subtle glassmorphism effect on dark background */
         .auth-container {
-            background: rgba(31, 41, 55, 0.7);
-            /* bg-gray-800 with transparency, slightly adjusted for purple theme */
+            background: rgba(255, 255, 255, 0.9);
+            /* White background with transparency */
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(75, 85, 99, 0.5);
+            border: 1px solid rgba(209, 213, 219, 0.5);
             /* Lighter border for definition */
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-            /* Stronger shadow for depth */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            /* Softer shadow for light theme */
         }
 
         .input-group {
@@ -57,19 +57,19 @@
 
         .input-group input {
             padding-left: 40px;
-            /* Adjust input field colors for dark theme */
-            background-color: rgba(55, 65, 81, 0.9);
-            /* bg-gray-700 with slight transparency */
-            border-color: rgba(107, 114, 128, 0.7);
-            /* gray-500 with transparency */
-            color: #e2e8f0;
-            /* light gray text for inputs */
+            /* Adjust input field colors for light theme */
+            background-color: rgba(249, 250, 251, 0.9);
+            /* bg-gray-50 with slight transparency */
+            border-color: rgba(209, 213, 219, 0.7);
+            /* gray-300 with transparency */
+            color: #374151;
+            /* gray-700 text for inputs */
         }
 
-        /* UPDATED: Placeholder color to cyan-300 */
+        /* UPDATED: Placeholder color to gray-500 */
         .input-group input::placeholder {
-            color: #67e8f9;
-            /* cyan-300 for placeholders */
+            color: #6b7280;
+            /* gray-500 for placeholders */
         }
 
         .input-group input:focus {
@@ -82,7 +82,7 @@
             left: 15px;
             top: 50%;
             transform: translateY(-50%);
-            color: #94a3b8;
+            color: #9ca3af;
             /* gray-400 for icons */
         }
 
@@ -91,16 +91,16 @@
             right: 15px;
             top: 50%;
             transform: translateY(-50%);
-            color: #94a3b8;
+            color: #9ca3af;
             /* gray-400 for icons */
             cursor: pointer;
         }
 
         /* Custom style for select element */
         .custom-select {
-            background-color: rgba(55, 65, 81, 0.9);
-            border-color: rgba(107, 114, 128, 0.7);
-            color: #e2e8f0;
+            background-color: rgba(249, 250, 251, 0.9);
+            border-color: rgba(209, 213, 219, 0.7);
+            color: #374151;
             padding-left: 15px;
             /* Adjust padding for select as it doesn't have an icon by default */
             -webkit-appearance: none;
@@ -109,8 +109,7 @@
             /* Remove default arrow on Firefox */
             appearance: none;
             /* Remove default arrow */
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3e%3cpath d='M7 8L10 11L13 8' stroke='%2394a3b8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3e%3c/svg%3e");
-            /* Custom arrow */
+
             background-repeat: no-repeat;
             background-position: right 0.75rem center;
             background-size: 1.5em 1.5em;
@@ -122,12 +121,12 @@
             outline: none;
         }
 
-        /* Checkbox style adjustment for dark theme */
+        /* Checkbox style adjustment for light theme */
         input[type="checkbox"] {
-            border-color: rgba(107, 114, 128, 0.7);
-            /* dark gray border */
-            background-color: rgba(55, 65, 81, 0.9);
-            /* dark gray background */
+            border-color: rgba(209, 213, 219, 0.7);
+            /* gray-300 border */
+            background-color: rgba(249, 250, 251, 0.9);
+            /* gray-50 background */
         }
 
         input[type="checkbox"]:checked {
@@ -168,14 +167,14 @@
     </style>
 </head>
 
-<body class="bg-gray-900 min-h-screen flex items-center justify-center p-4 antialiased"> <!-- UPDATED: Body background to gray-900 -->
+<body class="bg-white min-h-screen flex items-center justify-center p-4 antialiased">
     <!-- Animated Background Elements - adapted from index.php -->
     <div class="fixed inset-0 overflow-hidden -z-10">
         <div class="absolute top-0 left-0 w-full h-full opacity-5">
-            <!-- Adjusted blob colors for more vibrancy against dark background -->
-            <div class="absolute top-20 left-10 w-64 h-64 bg-indigo-600 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
-            <div class="absolute top-60 right-20 w-64 h-64 bg-teal-600 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
-            <div class="absolute bottom-20 left-1/2 w-64 h-64 bg-orange-600 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
+            <!-- Adjusted blob colors for more vibrancy against white background -->
+            <div class="absolute top-20 left-10 w-64 h-64 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
+            <div class="absolute top-60 right-20 w-64 h-64 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
+            <div class="absolute bottom-20 left-1/2 w-64 h-64 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-4000"></div>
         </div>
     </div>
 
@@ -183,26 +182,26 @@
         <!-- Left Side - Form -->
         <div class="w-full md:w-full p-8 md:p-12">
             <div class="text-center md:text-left">
-                <div class="flex justify-center md:justify-start">
-                    <!-- Removed the SVG icon -->
-                    <span class="ml-2 text-xl font-bold text-lime-300 self-center">HelpDesk Pro</span>
+                <div class="flex justify-center md:justify-start items-center">
+                    <!-- Logo placeholder - replace with your actual logo -->
+                    <img src="./assets/images/ESSA.png" alt="IT Help Request Tracker Logo" class="h-10 w-10">
+                    <span class="ml-2 text-xl font-bold text-indigo-600 self-center">IT Help Request Tracker</span>
                 </div>
-                <h1 class="mt-8 text-3xl font-extrabold text-white">Create Your Account</h1>
-                <p class="mt-2 text-gray-300">Start your 14-day free trial</p>
+                <h1 class="mt-8 text-3xl font-extrabold text-gray-900">Create Your Account</h1>
             </div>
 
             <form class="mt-8 space-y-6" action="process_register.php" method="POST">
                 <div class="rounded-md shadow-sm space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="first-name" class="block text-sm font-medium text-gray-300 mb-1">First name</label>
+                            <label for="first-name" class="block text-sm font-medium text-gray-700 mb-1">First name</label>
                             <div class="input-group">
                                 <i class="fas fa-user input-icon"></i>
                                 <input id="first-name" name="first-name" type="text" autocomplete="given-name" required class="appearance-none block w-full px-3 py-3 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm" placeholder="Seid" value="Seid">
                             </div>
                         </div>
                         <div>
-                            <label for="last-name" class="block text-sm font-medium text-gray-300 mb-1">Last name</label>
+                            <label for="last-name" class="block text-sm font-medium text-gray-700 mb-1">Last name</label>
                             <div class="input-group">
                                 <i class="fas fa-user input-icon"></i>
                                 <input id="last-name" name="last-name" type="text" autocomplete="family-name" required class="appearance-none block w-full px-3 py-3 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm" placeholder="Hussen" value="Hussen">
@@ -210,30 +209,30 @@
                         </div>
                     </div>
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-300 mb-1">Email address</label>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email address</label>
                         <div class="input-group">
                             <i class="fas fa-envelope input-icon"></i>
                             <input id="email" name="email" type="email" autocomplete="email" required class="appearance-none block w-full px-3 py-3 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm" placeholder="you@example.com">
                         </div>
                     </div>
                     <div>
-                        <label for="company" class="block text-sm font-medium text-gray-300 mb-1">Company (Optional)</label>
+                        <label for="company" class="block text-sm font-medium text-gray-700 mb-1">Company (Optional)</label>
                         <div class="input-group">
                             <i class="fas fa-building input-icon"></i>
                             <input id="company" name="company" type="text" autocomplete="organization" class="appearance-none block w-full px-3 py-3 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm" placeholder="Your Company">
                         </div>
                     </div>
                     <div>
-                        <label for="password" class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
                         <div class="input-group">
                             <i class="fas fa-lock input-icon"></i>
                             <input id="password" name="password" type="password" autocomplete="new-password" required class="appearance-none block w-full px-3 py-3 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm pr-10" placeholder="••••••••">
                             <i class="far fa-eye password-toggle" id="togglePassword"></i>
                         </div>
-                        <p class="mt-1 text-xs text-gray-400">Must be at least 8 characters</p>
+                        <p class="mt-1 text-xs text-gray-500">Must be at least 8 characters</p>
                     </div>
                     <div>
-                        <label for="confirm-password" class="block text-sm font-medium text-gray-300 mb-1">Confirm Password</label>
+                        <label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
                         <div class="input-group">
                             <i class="fas fa-lock input-icon"></i>
                             <input id="confirm-password" name="confirm-password" type="password" autocomplete="new-password" required class="appearance-none block w-full px-3 py-3 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm pr-10" placeholder="••••••••">
@@ -241,7 +240,7 @@
                         </div>
                     </div>
                     <div>
-                        <label for="role" class="block text-sm font-medium text-gray-300 mb-1">I am a...</label>
+                        <label for="role" class="block text-sm font-medium text-gray-700 mb-1">I am a...</label>
                         <select id="role" name="role" required class="custom-select block w-full px-3 py-3 border rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
                             <option value="">Select your role</option>
                             <option value="user">End User (Need IT Support)</option>
@@ -255,16 +254,16 @@
                 </div>
 
                 <div class="flex items-center">
-                    <input id="terms" name="terms" type="checkbox" required class="h-4 w-4 text-primary focus:ring-primary border-gray-600 rounded">
-                    <label for="terms" class="ml-2 block text-sm text-gray-300">
+                    <input id="terms" name="terms" type="checkbox" required class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                    <label for="terms" class="ml-2 block text-sm text-gray-700">
                         I agree to the <a href="#" class="font-medium text-primary hover:text-primary-light">Terms of Service</a> and <a href="#" class="font-medium text-primary hover:text-primary-light">Privacy Policy</a>
                     </label>
                 </div>
 
                 <div>
-                    <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors">
+                    <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors shadow-md">
                         <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                            <svg class="h-5 w-5 text-primary-light group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <svg class="h-5 w-5 text-blue-300 group-hover:text-white" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
                             </svg>
                         </span>
@@ -276,31 +275,31 @@
             <div class="mt-6">
                 <div class="relative">
                     <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-600"></div>
+                        <div class="w-full border-t border-gray-300"></div>
                     </div>
                     <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-gray-800 text-gray-400">Or sign up with</span>
+                        <span class="px-2 bg-white text-gray-500">Or sign up with</span>
                     </div>
                 </div>
 
                 <div class="mt-6 grid grid-cols-2 gap-3">
                     <div>
-                        <a href="#" class="w-full inline-flex justify-center py-3 px-6 border border-blue-800 rounded-md shadow-sm bg-blue-700 text-sm font-medium text-white hover:bg-blue-600 transition-colors">
+                        <a href="#" class="w-full inline-flex justify-center py-3 px-6 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
                             Google
-                            <i class="fab fa-google text-red-400 ml-2"></i>
+                            <i class="fab fa-google text-red-500 ml-2"></i>
                         </a>
                     </div>
                     <div>
-                        <a href="#" class="w-full inline-flex justify-center py-3 px-6 border border-blue-800 rounded-md shadow-sm bg-blue-700 text-sm font-medium text-white hover:bg-blue-600 transition-colors">
+                        <a href="#" class="w-full inline-flex justify-center py-3 px-6 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
                             Microsoft
-                            <i class="fab fa-microsoft text-blue-400 ml-2"></i>
+                            <i class="fab fa-microsoft text-blue-500 ml-2"></i>
                         </a>
                     </div>
                 </div>
             </div>
 
             <div class="mt-8 text-center">
-                <p class="text-sm text-gray-300">
+                <p class="text-sm text-gray-600">
                     Already have an account?
                     <a href="login.php" class="font-medium text-primary hover:text-primary-light">Sign in</a>
                 </p>

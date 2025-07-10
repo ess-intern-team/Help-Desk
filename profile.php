@@ -1,88 +1,248 @@
 <?php
-// Start session and fetch existing user data (fake for now)
 session_start();
-$user = [
-    'name' => 'Seid Hussen',
-    'email' => 'seid@example.com',
-    'photo' => 'default.png' // later you will replace this with uploaded file name
-];
+require_once __DIR__ . '/db_connect.php';
+
+// Initialize messages and redirect flag
+$error = "";
+$success = "";
+$redirectAfterSuccess = false;
+
+// ✅ Force a test session if not already logged in
+if (!isset($_SESSION['user_id'])) {
+    $_SESSION['user_id'] = 1; // Make sure this ID exists in your DB
+    $_SESSION['name'] = 'Seid Hussen';
+    $_SESSION['role'] = 'user';
+}
+
+// Assign user ID from session
+$userId = $_SESSION['user_id'];
+
+// Prepare and run the query to fetch user info
+$sql = "SELECT first_name, last_name, email, profile_photo, `password-hash` FROM users WHERE id = ?";
+$stmt = $conn->prepare($sql);
+
+if (!$stmt) {
+    die("❌ SQL prepare error: " . $conn->error);
+}
+
+$stmt->bind_param("i", $userId);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result && $result->num_rows > 0) {
+    $user = $result->fetch_assoc();
+} else {
+    // Debug info for missing user
+    echo "❌ User not found.<br>";
+    echo "Session user_id: " . htmlspecialchars($_SESSION['user_id']) . "<br>";
+    echo "Session role: " . htmlspecialchars($_SESSION['role']) . "<br>";
+    exit();
+}
+
+// Profile update
+if (isset($_POST['update_profile'])) {
+    $first = trim($_POST['first_name']);
+    $last = trim($_POST['last_name']);
+    $email = trim($_POST['email']);
+    $profile_photo = $user['profile_photo'];
+
+    if (!$first || !$last || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = "❗ Please enter valid first name, last name, and email.";
+    } else {
+        // Handle photo upload if any
+        if (!empty($_FILES['profile_photo']['name'])) {
+            $allowed = ['image/jpeg', 'image/png', 'image/gif'];
+            $ext = pathinfo($_FILES['profile_photo']['name'], PATHINFO_EXTENSION);
+            $type = $_FILES['profile_photo']['type'];
+            $size = $_FILES['profile_photo']['size'];
+
+            if (!in_array($type, $allowed)) {
+                $error = "Only JPG, PNG, or GIF files allowed.";
+            } elseif ($size > 2 * 1024 * 1024) {
+                $error = "Max file size is 2MB.";
+            } else {
+                $newName = 'user_' . $userId . '_' . time() . '.' . $ext;
+                $uploadDir = __DIR__ . '/uploads/profile_photos/';
+                if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+                $dest = $uploadDir . $newName;
+
+                if (move_uploaded_file($_FILES['profile_photo']['tmp_name'], $dest)) {
+                    if ($profile_photo && file_exists($uploadDir . $profile_photo)) {
+                        unlink($uploadDir . $profile_photo);
+                    }
+                    $profile_photo = $newName;
+                } else {
+                    $error = "Failed to upload profile photo.";
+                }
+            }
+        }
+
+        if (!$error) {
+            $update = $conn->prepare("UPDATE users SET first_name=?, last_name=?, email=?, profile_photo=? WHERE id=?");
+            $update->bind_param("ssssi", $first, $last, $email, $profile_photo, $userId);
+            if ($update->execute()) {
+                $success = "✅ Profile updated successfully. Redirecting to dashboard...";
+                $_SESSION['name'] = $first . ' ' . $last;
+                // Update $user array to reflect new data in form fields
+                $user['first_name'] = $first;
+                $user['last_name'] = $last;
+                $user['email'] = $email;
+                $user['profile_photo'] = $profile_photo;
+                $redirectAfterSuccess = true;
+            } else {
+                $error = "Update failed: " . $conn->error;
+            }
+        }
+    }
+}
+
+// Password update
+if (isset($_POST['change_password'])) {
+    $current = $_POST['current_password'] ?? '';
+    $new = $_POST['new_password'] ?? '';
+    $confirm = $_POST['confirm_password'] ?? '';
+
+    if (!$current || !$new || !$confirm) {
+        $error = "❗ Fill in all password fields.";
+    } elseif (!password_verify($current, $user['password-hash'])) {
+        $error = "❗ Current password incorrect.";
+    } elseif ($new !== $confirm) {
+        $error = "❗ New passwords do not match.";
+    } elseif (strlen($new) < 6) {
+        $error = "❗ Password too short.";
+    } else {
+        $newHash = password_hash($new, PASSWORD_DEFAULT);
+        $stmt = $conn->prepare("UPDATE users SET `password-hash` = ? WHERE id = ?");
+        $stmt->bind_param("si", $newHash, $userId);
+        if ($stmt->execute()) {
+            $success = "✅ Password changed successfully. Redirecting to dashboard...";
+            $redirectAfterSuccess = true;
+        } else {
+            $error = "❌ Password change failed.";
+        }
+    }
+}
+
+function profilePhotoUrl($filename)
+{
+    $path = __DIR__ . "/uploads/profile_photos/$filename";
+    return ($filename && file_exists($path)) ? "uploads/profile_photos/$filename" : "https://via.placeholder.com/150?text=No+Photo";
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>My Profile</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <title>Profile - ESSA Helpdesk</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
         body {
-            background: linear-gradient(to right, #e0f7fa, #e8eaf6);
-            font-family: Arial, sans-serif;
+            background: #eef2f7;
+            font-family: 'Segoe UI', sans-serif;
         }
 
-        .card {
+        .container {
+            max-width: 750px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 30px;
             border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
 
-        .form-label {
-            font-weight: bold;
-        }
-
-        .profile-img {
-            width: 120px;
-            height: 120px;
-            object-fit: cover;
+        .profile-photo {
+            width: 140px;
+            height: 140px;
             border-radius: 50%;
-            border: 3px solid #6C63FF;
+            object-fit: cover;
+            border: 4px solid #2563eb;
         }
 
-        .btn-primary {
-            background-color: #6C63FF;
-            border-color: #6C63FF;
+        .btn {
+            border-radius: 30px;
         }
 
-        .btn-primary:hover {
-            background-color: #554ad4;
+        h2 {
+            font-weight: 700;
+            color: #1e3a8a;
         }
     </style>
 </head>
 
 <body>
-    <div class="container mt-5">
-        <h2 class="text-center mb-4">👤 My Profile</h2>
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card p-4">
-                    <div class="text-center mb-3">
-                        <img src="uploads/<?php echo $user['photo']; ?>" class="profile-img" alt="Profile Picture">
-                    </div>
+    <div class="container">
+        <h2 class="text-center mb-4">Profile Settings</h2>
 
-                    <form action="update_profile.php" method="POST" enctype="multipart/form-data">
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Full Name</label>
-                            <input type="text" name="name" class="form-control" value="<?php echo $user['name']; ?>" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email Address</label>
-                            <input type="email" name="email" class="form-control" value="<?php echo $user['email']; ?>" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">New Password</label>
-                            <input type="password" name="password" class="form-control" placeholder="Leave blank to keep current password">
-                        </div>
-                        <div class="mb-3">
-                            <label for="photo" class="form-label">Upload New Photo</label>
-                            <input type="file" name="photo" class="form-control">
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">Update Profile</button>
-                    </form>
-                </div>
+        <?php if ($error): ?>
+            <div class="alert alert-danger"><?= htmlspecialchars($error); ?></div>
+        <?php elseif ($success): ?>
+            <div class="alert alert-success"><?= htmlspecialchars($success); ?></div>
+        <?php endif; ?>
+
+        <!-- Profile Section -->
+        <form method="POST" enctype="multipart/form-data">
+            <div class="text-center mb-3">
+                <img src="<?= profilePhotoUrl($user['profile_photo']); ?>" class="profile-photo" alt="Profile Photo">
             </div>
-        </div>
+
+            <div class="mb-3">
+                <label class="form-label">Change Profile Photo</label>
+                <input type="file" name="profile_photo" class="form-control" accept="image/*" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">First Name</label>
+                <input type="text" name="first_name" class="form-control" value="<?= htmlspecialchars($user['first_name']) ?>" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Last Name</label>
+                <input type="text" name="last_name" class="form-control" value="<?= htmlspecialchars($user['last_name']) ?>" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Email Address</label>
+                <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($user['email']) ?>" required />
+            </div>
+
+            <button type="submit" name="update_profile" class="btn btn-primary">Update Profile</button>
+        </form>
+
+        <hr class="my-5">
+
+        <!-- Password Section -->
+        <h4>Change Password</h4>
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label">Current Password</label>
+                <input type="password" name="current_password" class="form-control" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">New Password</label>
+                <input type="password" name="new_password" class="form-control" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Confirm New Password</label>
+                <input type="password" name="confirm_password" class="form-control" required />
+            </div>
+
+            <button type="submit" name="change_password" class="btn btn-danger">Change Password</button>
+        </form>
     </div>
+
+    <?php if ($redirectAfterSuccess): ?>
+        <script>
+            // Redirect after 2.5 seconds
+            setTimeout(() => {
+                window.location.href = 'user_dashboard.php'; // Change this path to your dashboard page
+            }, 2500);
+        </script>
+    <?php endif; ?>
 </body>
 
 </html>

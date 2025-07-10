@@ -142,7 +142,7 @@ $pendingRequests = '';
                 <a href="notifications.php" class="text-white position-relative" title="Notifications">
                     <i class="fas fa-bell"></i>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                        3
+
                         <span class="visually-hidden">unread notifications</span>
                     </span>
                 </a>
