@@ -113,8 +113,9 @@
     <div class="overlay"></div>
 
     <div class="container-hero">
-        <h1>Welcome to ESSA</h1>
-        <h2>Located at Ethio Ceramic Building, Addis Ababa</h2>
+        <h1>Welcome To </h1>
+        <h3>Ethiopian Statistical Service</h3>
+
         <p>Your reliable IT Help Request Tracker system</p>
 
         <div class="btn-group mt-4" role="group" aria-label="Login and Signup buttons">
