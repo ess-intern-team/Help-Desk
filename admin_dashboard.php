@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // Get user info from session
-$user_name = $_SESSION['user_name'] ?? 'User';
+$user_name = $_SESSION['user_name'] ?? 'Admin';
 $role = $_SESSION['role'] ?? 'admin';
 
 // Initialize ticket counts (these will be populated by your backend)

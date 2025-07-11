@@ -64,8 +64,12 @@
         }
 
         .logo {
-            width: 520px;
+            width: 180px;
+            height: auto;
             margin-bottom: 35px;
+            /* CSS to remove white background */
+            filter: brightness(1.1) drop-shadow(0 0 0 transparent);
+            mix-blend-mode: multiply;
         }
 
         h1 {
@@ -104,7 +108,7 @@
             }
 
             .logo {
-                width: 150px;
+                width: 130px;
             }
 
             .top-nav {
@@ -121,7 +125,6 @@
 </head>
 
 <body>
-
     <!-- 🔝 Top Right Login/Sign Up -->
     <div class="top-nav">
         <a href="login.php" class="btn btn-login">Login</a>
@@ -135,7 +138,6 @@
         <h3>Ethiopian Statistical Service</h3>
         <p>Your reliable, fast, and modern IT Help Request Tracking System. Built to simplify your support journey and make your work easier.</p>
     </div>
-
 </body>
 
 </html>

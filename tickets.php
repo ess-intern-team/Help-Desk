@@ -153,7 +153,7 @@ $total_pages = ceil($total_items / $per_page);
                     <span class="text-xl font-bold text-indigo-600">HelpDesk Pro</span>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <a href="dashboard.php" class="ml-8 px-3 py-2 rounded-md text-sm font-medium text-black hover:text-primary hover:bg-gray-100 transition-colors">
+                    <a href="user_dashboard.php" class="ml-8 px-3 py-2 rounded-md text-sm font-medium text-black hover:text-primary hover:bg-gray-100 transition-colors">
                         <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
                     </a>
                     <a href="tickets.php" class="px-3 py-2 rounded-md text-sm font-medium bg-indigo-100 text-indigo-700">Tickets</a>

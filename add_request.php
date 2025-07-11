@@ -158,7 +158,7 @@
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center">
                     <span class="text-xl font-bold text-primary">HelpDesk Pro</span>
-                    <a href="dashboard.php" class="ml-8 px-3 py-2 rounded-md text-sm font-medium text-gray-200 hover:text-white hover:bg-gray-700 transition-colors">
+                    <a href="user_dashboard.php" class="ml-8 px-3 py-2 rounded-md text-sm font-medium text-gray-200 hover:text-white hover:bg-gray-700 transition-colors">
                         <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
                     </a>
                 </div>
