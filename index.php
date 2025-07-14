@@ -128,7 +128,6 @@
     <!-- 🔝 Top Right Login/Sign Up -->
     <div class="top-nav">
         <a href="login.php" class="btn btn-login">Login</a>
-        <a href="register.php" class="btn btn-signup">Sign Up</a>
     </div>
 
     <!-- 🌟 Welcome Center -->

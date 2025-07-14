@@ -82,9 +82,10 @@ $notifications = [];
         <?php endif; ?>
 
         <div class="text-center mt-4">
-            <a href="dashboard.php" class="btn btn-outline-primary">
-                <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
-            </a>
+            <a href="user_dashboard.php" class="btn btn-outline-primary">
+                <a href="admin_dashboard.php" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+                </a>
         </div>
     </div>
     <?php include 'includes/footer.php'; ?>

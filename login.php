@@ -228,23 +228,6 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-                <button type="button" class="social-btn flex items-center justify-center py-3 px-4 rounded-lg border border-gray-300 bg-white text-gray-700">
-                    <i class="fab fa-google text-red-500 text-xl mr-3"></i>
-                    <span>Google</span>
-                </button>
-                <button type="button" class="social-btn flex items-center justify-center py-3 px-4 rounded-lg border border-gray-300 bg-white text-gray-700">
-                    <i class="fab fa-microsoft text-blue-500 text-xl mr-3"></i>
-                    <span>Microsoft</span>
-                </button>
-            </div>
-
-            <div class="mt-8 text-center md:text-left">
-                <p class="text-gray-600">
-                    Don't have an account?
-                    <a href="register.php" class="font-medium text-indigo-600 hover:text-indigo-500 transition-colors">Sign up</a>
-                </p>
-            </div>
         </div>
 
         <!-- Right Side - Help Image -->

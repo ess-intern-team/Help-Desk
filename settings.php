@@ -150,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <!-- Back to Dashboard button centered at bottom -->
         <div class="text-center mt-5 mb-4">
-            <a href="dashboard.php" class="btn btn-outline-primary">
+            <a href="user_dashboard.php" class="btn btn-outline-primary">
                 <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
             </a>
         </div>

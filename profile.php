@@ -1,45 +1,48 @@
 <?php
 session_start();
-require_once __DIR__ . '/db_connect.php';
 
-// Initialize messages and redirect flag
-$error = "";
-$success = "";
-$redirectAfterSuccess = false;
+// 1. First include the database connection with error handling
+try {
+    require 'db_connect.php';
 
-// ✅ Force a test session if not already logged in
+    // Verify connection was successful
+    if (!isset($conn) || !($conn instanceof PDO)) {
+        throw new Exception("Database connection failed");
+    }
+} catch (Exception $e) {
+    die("Error: " . $e->getMessage());
+}
+
+// Check user session
 if (!isset($_SESSION['user_id'])) {
-    $_SESSION['user_id'] = 1; // Make sure this ID exists in your DB
+    $_SESSION['user_id'] = 1; // for testing - ensure this ID exists in DB
     $_SESSION['name'] = 'Seid Hussen';
     $_SESSION['role'] = 'user';
 }
 
-// Assign user ID from session
 $userId = $_SESSION['user_id'];
+$error = "";
+$success = "";
+$redirectAfterSuccess = false;
 
-// Prepare and run the query to fetch user info
-$sql = "SELECT first_name, last_name, email, profile_photo, `password-hash` FROM users WHERE id = ?";
-$stmt = $conn->prepare($sql);
+// Fetch user info
+try {
+    $sql = "SELECT first_name, last_name, email, profile_photo, password_hash FROM users WHERE id = :id";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute(['id' => $userId]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if (!$stmt) {
-    die("❌ SQL prepare error: " . $conn->error);
+    if (!$user) {
+        throw new Exception("User not found");
+    }
+} catch (PDOException $e) {
+    die("Database error: " . $e->getMessage());
+} catch (Exception $e) {
+    die($e->getMessage());
 }
 
-$stmt->bind_param("i", $userId);
-$stmt->execute();
-$result = $stmt->get_result();
 
-if ($result && $result->num_rows > 0) {
-    $user = $result->fetch_assoc();
-} else {
-    // Debug info for missing user
-    echo "❌ User not found.<br>";
-    echo "Session user_id: " . htmlspecialchars($_SESSION['user_id']) . "<br>";
-    echo "Session role: " . htmlspecialchars($_SESSION['role']) . "<br>";
-    exit();
-}
-
-// Profile update
+// Handle profile update
 if (isset($_POST['update_profile'])) {
     $first = trim($_POST['first_name']);
     $last = trim($_POST['last_name']);
@@ -49,7 +52,7 @@ if (isset($_POST['update_profile'])) {
     if (!$first || !$last || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = "❗ Please enter valid first name, last name, and email.";
     } else {
-        // Handle photo upload if any
+        // Handle photo upload
         if (!empty($_FILES['profile_photo']['name'])) {
             $allowed = ['image/jpeg', 'image/png', 'image/gif'];
             $ext = pathinfo($_FILES['profile_photo']['name'], PATHINFO_EXTENSION);
@@ -78,25 +81,32 @@ if (isset($_POST['update_profile'])) {
         }
 
         if (!$error) {
-            $update = $conn->prepare("UPDATE users SET first_name=?, last_name=?, email=?, profile_photo=? WHERE id=?");
-            $update->bind_param("ssssi", $first, $last, $email, $profile_photo, $userId);
-            if ($update->execute()) {
+            try {
+                $updateSql = "UPDATE users SET first_name = :first, last_name = :last, email = :email, profile_photo = :photo WHERE id = :id";
+                $updateStmt = $conn->prepare($updateSql);
+                $updateStmt->execute([
+                    ':first' => $first,
+                    ':last' => $last,
+                    ':email' => $email,
+                    ':photo' => $profile_photo,
+                    ':id' => $userId
+                ]);
+
                 $success = "✅ Profile updated successfully. Redirecting to dashboard...";
                 $_SESSION['name'] = $first . ' ' . $last;
-                // Update $user array to reflect new data in form fields
                 $user['first_name'] = $first;
                 $user['last_name'] = $last;
                 $user['email'] = $email;
                 $user['profile_photo'] = $profile_photo;
                 $redirectAfterSuccess = true;
-            } else {
-                $error = "Update failed: " . $conn->error;
+            } catch (PDOException $e) {
+                $error = "Update failed: " . $e->getMessage();
             }
         }
     }
 }
 
-// Password update
+// Handle password change
 if (isset($_POST['change_password'])) {
     $current = $_POST['current_password'] ?? '';
     $new = $_POST['new_password'] ?? '';
@@ -104,21 +114,22 @@ if (isset($_POST['change_password'])) {
 
     if (!$current || !$new || !$confirm) {
         $error = "❗ Fill in all password fields.";
-    } elseif (!password_verify($current, $user['password-hash'])) {
+    } elseif (!password_verify($current, $user['password_hash'])) {
         $error = "❗ Current password incorrect.";
     } elseif ($new !== $confirm) {
         $error = "❗ New passwords do not match.";
     } elseif (strlen($new) < 6) {
         $error = "❗ Password too short.";
     } else {
-        $newHash = password_hash($new, PASSWORD_DEFAULT);
-        $stmt = $conn->prepare("UPDATE users SET `password-hash` = ? WHERE id = ?");
-        $stmt->bind_param("si", $newHash, $userId);
-        if ($stmt->execute()) {
+        try {
+            $newHash = password_hash($new, PASSWORD_DEFAULT);
+            $updatePwdSql = "UPDATE users SET password_hash = :pwd WHERE id = :id";
+            $stmtPwd = $conn->prepare($updatePwdSql);
+            $stmtPwd->execute([':pwd' => $newHash, ':id' => $userId]);
             $success = "✅ Password changed successfully. Redirecting to dashboard...";
             $redirectAfterSuccess = true;
-        } else {
-            $error = "❌ Password change failed.";
+        } catch (PDOException $e) {
+            $error = "❌ Password change failed: " . $e->getMessage();
         }
     }
 }
@@ -182,10 +193,9 @@ function profilePhotoUrl($filename)
             <div class="alert alert-success"><?= htmlspecialchars($success); ?></div>
         <?php endif; ?>
 
-        <!-- Profile Section -->
         <form method="POST" enctype="multipart/form-data">
             <div class="text-center mb-3">
-                <img src="<?= profilePhotoUrl($user['profile_photo']); ?>" class="profile-photo" alt="Profile Photo">
+                <img src="<?= profilePhotoUrl($user['profile_photo']); ?>" class="profile-photo" alt="Profile Photo" />
             </div>
 
             <div class="mb-3">
@@ -195,25 +205,24 @@ function profilePhotoUrl($filename)
 
             <div class="mb-3">
                 <label class="form-label">First Name</label>
-                <input type="text" name="first_name" class="form-control" value="<?= htmlspecialchars($user['first_name']) ?>" required />
+                <input type="text" name="first_name" class="form-control" value="<?= htmlspecialchars($user['first_name']); ?>" required />
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Last Name</label>
-                <input type="text" name="last_name" class="form-control" value="<?= htmlspecialchars($user['last_name']) ?>" required />
+                <input type="text" name="last_name" class="form-control" value="<?= htmlspecialchars($user['last_name']); ?>" required />
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Email Address</label>
-                <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($user['email']) ?>" required />
+                <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($user['email']); ?>" required />
             </div>
 
             <button type="submit" name="update_profile" class="btn btn-primary">Update Profile</button>
         </form>
 
-        <hr class="my-5">
+        <hr class="my-5" />
 
-        <!-- Password Section -->
         <h4>Change Password</h4>
         <form method="POST">
             <div class="mb-3">
@@ -237,9 +246,8 @@ function profilePhotoUrl($filename)
 
     <?php if ($redirectAfterSuccess): ?>
         <script>
-            // Redirect after 2.5 seconds
             setTimeout(() => {
-                window.location.href = 'user_dashboard.php'; // Change this path to your dashboard page
+                window.location.href = 'user_dashboard.php'; // Adjust if necessary
             }, 2500);
         </script>
     <?php endif; ?>
