@@ -184,7 +184,7 @@
                             <i class="fas fa-envelope input-icon"></i>
                             <input id="email" name="email" type="email" autocomplete="email" required
                                 class="w-full px-4 py-3 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary text-lg"
-                                placeholder="you@example.com">
+                                placeholder="hussenseid670@gmail.com">
                         </div>
                     </div>
 
@@ -197,7 +197,7 @@
                             <i class="fas fa-lock input-icon"></i>
                             <input id="password" name="password" type="password" autocomplete="current-password" required
                                 class="w-full px-4 py-3 border rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary text-lg pr-12"
-                                placeholder="••••••••">
+                                placeholder="Seid2986@">
                             <i class="far fa-eye password-toggle" id="togglePassword"></i>
                         </div>
                     </div>
