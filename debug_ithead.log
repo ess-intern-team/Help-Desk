@@ -1,0 +1,300 @@
+DEBUG [ithead.php 2025-07-17 05:40:49]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:41:14]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:41:15]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:41:15]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:41:15]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:41:16]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:41:16]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:41:16]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:41:16]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:41:21]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:41:21]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+SUCCESS [ithead.php 2025-07-17 05:41:29]: Message sent to specialist_hardware
+DEBUG [ithead.php 2025-07-17 05:41:29]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:41:47]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:41:51]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:42:42]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 1
+Ticket: ID=27, Sender=employee1, Receiver=it_head_software, Role From=employee, Title=Test Ticket
+DEBUG [ithead.php 2025-07-17 05:42:42]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 1
+Ticket: ID=27, Sender=employee1, Receiver=it_head_software, Role From=employee, Title=Test Ticket
+DEBUG [ithead.php 2025-07-17 05:42:44]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 1
+Ticket: ID=27, Sender=employee1, Receiver=it_head_software, Role From=employee, Title=Test Ticket
+DEBUG [ithead.php 2025-07-17 05:43:01]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 1
+Ticket: ID=27, Sender=employee1, Receiver=it_head_software, Role From=employee, Title=Test Ticket
+DEBUG [ithead.php 2025-07-17 05:43:02]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 1
+Ticket: ID=27, Sender=employee1, Receiver=it_head_software, Role From=employee, Title=Test Ticket
+DEBUG [ithead.php 2025-07-17 05:43:02]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 1
+Ticket: ID=27, Sender=employee1, Receiver=it_head_software, Role From=employee, Title=Test Ticket
+SUCCESS [ithead.php 2025-07-17 05:43:14]: Message sent to specialist_network
+DEBUG [ithead.php 2025-07-17 05:43:14]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 1
+Ticket: ID=27, Sender=employee1, Receiver=it_head_software, Role From=employee, Title=Test Ticket
+DEBUG [ithead.php 2025-07-17 05:45:25]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:45:52]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:45:54]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:45:54]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:45:54]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:45:54]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:45:55]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:45:55]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:45:55]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+SUCCESS [ithead.php 2025-07-17 05:46:05]: Message sent to specialist_software (ID: 2).
+DEBUG [ithead.php 2025-07-17 05:46:05]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:46:10]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:46:12]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:46:34]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 05:46:37]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 0
+No tickets found.
+DEBUG [ithead.php 2025-07-17 09:41:08]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 1
+Ticket: ID=4, Sender=employee1, Receiver=it_head_software, Role From=employee, Title=Printer Issue
+SUCCESS [ithead.php 2025-07-17 09:41:32]: Message sent to specialist_network (ID: 7).
+DEBUG [ithead.php 2025-07-17 09:41:32]:
+Current User: it_head_software
+Query: SELECT id, sender, receiver, role_from, role_to, title, message, category, priority, sent_at
+                    FROM messages
+                    WHERE receiver = ? AND role_from = 'employee'
+                    ORDER BY sent_at DESC
+Rows Found: 1
+Ticket: ID=4, Sender=employee1, Receiver=it_head_software, Role From=employee, Title=Printer Issue
