@@ -1,11 +1,7 @@
 <?php
-// employee.php
-session_start(); // Ensure session is started for authentication
-
-// Assuming db_connect.php provides a getDbConnection() function
+session_start();
 require_once 'db_connect.php';
 
-// --- Helper Functions (Ensuring they are defined before first use) ---
 function redirect($page, $params = [])
 {
     $url = $page;
@@ -39,11 +35,9 @@ function displayMessage()
                 var toastEl = document.querySelector('.toast');
                 if (toastEl) {
                     setTimeout(function() {
-                        var toast = bootstrap.Toast.getInstance(toastEl);
-                        if (toast) {
-                            toast.hide();
-                        }
-                    }, 5000); // Hide after 5 seconds
+                        var toast = bootstrap.Toast.getInstance(toastEl) || new bootstrap.Toast(toastEl);
+                        toast.hide();
+                    }, 5000);
                 }
             });
         </script>";
@@ -52,34 +46,35 @@ function displayMessage()
 
 function requireLogin($requiredRole = null)
 {
-    // If not logged in at all, redirect to login page
     if (!isset($_SESSION['user_id']) || !isset($_SESSION['username']) || !isset($_SESSION['role'])) {
         $_SESSION['displayMessage'] = "You must be logged in to access this page.";
         $_SESSION['messageType'] = "danger";
-        redirect('login.php'); // Assuming login.php handles initial login
+        redirect('login.php');
     }
-
-    // If logged in but role doesn't match required role, redirect to index or an error page
     if ($requiredRole && $_SESSION['role'] !== $requiredRole) {
         $_SESSION['displayMessage'] = "You do not have permission to access this page. Your role: " . ucfirst($_SESSION['role']);
         $_SESSION['messageType'] = "danger";
-        redirect('index.php'); // Redirect to a general dashboard or login
+        redirect('index.php');
     }
 }
-// --- End Helper Functions ---
 
-
-requireLogin('employee'); // Ensure only employees can access
-
+requireLogin('employee');
 $currentUser = $_SESSION['username'];
 $currentRole = $_SESSION['role'];
+$conn = getDbConnection();
 
-$conn = getDbConnection(); // Get the database connection
+// Get a valid IT Head for ticket submission
+$sql = "SELECT username FROM users WHERE role = 'ithead' LIMIT 1";
+$result = $conn->query($sql);
+$itHead = $result && $result->num_rows > 0 ? $result->fetch_assoc()['username'] : null;
+if (!$itHead) {
+    error_log("No IT Head found in the database for employee ticket submission.");
+    $_SESSION['displayMessage'] = "No IT Head available to receive tickets. Please contact the administrator.";
+    $_SESSION['messageType'] = "danger";
+    redirect('employee.php');
+}
 
-// Handle Messages from Session (PRG pattern)
-displayMessage(); // Use the helper function
-
-// Handle Form Submission (Create New Ticket)
+// Handle Form Submission
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_ticket'])) {
     try {
         $requiredFields = ['title', 'message', 'category', 'priority'];
@@ -93,9 +88,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_ticket'])) {
         $message = htmlspecialchars($_POST['message']);
         $category = htmlspecialchars($_POST['category']);
         $priority = htmlspecialchars($_POST['priority']);
-        $receiver = 'ithead1'; // Default IT Head for initial tickets (adapt if you have multiple IT heads)
+        $receiver = $itHead;
 
-        // Validate category and priority against allowed values (backend validation)
         $allowedCategories = ['hardware', 'software', 'network', 'account', 'other'];
         $allowedPriorities = ['high', 'medium', 'low'];
         if (!in_array(strtolower($category), $allowedCategories)) {
@@ -112,7 +106,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_ticket'])) {
             throw new Exception("Database error preparing statement: " . $conn->error);
         }
         $stmt->bind_param("ssssss", $currentUser, $receiver, $title, $message, $category, $priority);
-
         if ($stmt->execute()) {
             $_SESSION['displayMessage'] = "Your ticket has been submitted successfully! Ticket ID: " . $conn->insert_id;
             $_SESSION['messageType'] = "success";
@@ -120,18 +113,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_ticket'])) {
             throw new Exception("Failed to submit ticket: " . $stmt->error);
         }
         $stmt->close();
-        redirect('employee.php'); // Redirect to prevent form resubmission
+        redirect('employee.php');
     } catch (Exception $e) {
         error_log("Ticket submission error for employee " . $currentUser . ": " . $e->getMessage());
         $_SESSION['displayMessage'] = $e->getMessage();
         $_SESSION['messageType'] = "danger";
-        redirect('employee.php'); // Redirect with error message
+        redirect('employee.php');
     }
 }
 
-// Fetch Tickets sent by current Employee (original tickets)
+// Fetch Tickets sent by current Employee
 $myTickets = [];
-// Joining with messages (resp) to get IT Head's response directly associated with the original ticket
 $sql = "SELECT m.*,
             resp.message as response_message,
             resp.sent_at as response_sent_at,
@@ -139,7 +131,7 @@ $sql = "SELECT m.*,
             resp.status as response_status
         FROM messages m
         LEFT JOIN messages resp ON m.id = resp.parent_id AND resp.role_from = 'ithead' AND resp.role_to = 'employee'
-        WHERE m.sender = ? AND m.role_from = 'employee' AND m.parent_id IS NULL -- Only fetch original tickets from employee
+        WHERE m.sender = ? AND m.role_from = 'employee' AND m.parent_id IS NULL
         ORDER BY m.sent_at DESC";
 $stmt = $conn->prepare($sql);
 if ($stmt) {
@@ -152,11 +144,9 @@ if ($stmt) {
     $stmt->close();
 } else {
     error_log("Error fetching employee tickets: " . $conn->error);
-    // Don't show raw error to user; handle gracefully
 }
 
-// Fetch responses *received* from IT Head (these are separate messages, not joins on original tickets)
-// This query fetches messages where the current employee is the receiver and the sender is an IT Head.
+// Fetch responses received from IT Head
 $receivedResponses = [];
 $sql = "SELECT m.*,
             parent.sender as original_ticket_sender,
@@ -241,7 +231,6 @@ $conn->close();
             color: #856404;
         }
 
-        /* Added for clarity */
         .toast-container {
             position: fixed;
             top: 20px;
@@ -268,9 +257,7 @@ $conn->close();
         <div class="row justify-content-center">
             <div class="col-lg-10">
                 <div class="text-center mb-5">
-                    <h1 class="display-5 fw-bold text-primary">
-                        <i class="bi bi-person-fill"></i> Employee Portal
-                    </h1>
+                    <h1 class="display-5 fw-bold text-primary"><i class="bi bi-person-fill"></i> Employee Portal</h1>
                     <p class="lead">Welcome, <?= htmlspecialchars($currentUser) ?> (<?= ucfirst($currentRole) ?>)</p>
                     <a href="logout.php" class="btn btn-outline-danger btn-sm">Logout</a>
                 </div>
@@ -302,11 +289,11 @@ $conn->close();
                             <form action="" method="POST">
                                 <div class="mb-3">
                                     <label for="title" class="form-label">Subject / Title</label>
-                                    <input type="text" class="form-control" id="title" name="title" required placeholder="e.g., Internet not working, Software installation issue">
+                                    <input type="text" class="form-control" id="title" name="title" required placeholder="e.g., Internet not working">
                                 </div>
                                 <div class="mb-3">
                                     <label for="message" class="form-label">Description of Issue</label>
-                                    <textarea class="form-control" id="message" name="message" rows="5" required placeholder="Provide a detailed description of the problem..."></textarea>
+                                    <textarea class="form-control" id="message" name="message" rows="5" required placeholder="Provide a detailed description..."></textarea>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
@@ -462,7 +449,6 @@ $conn->close();
                                                         </div>
                                                         <p class="mt-2 text-muted"><small>Status: <?= ucfirst($response['original_ticket_status']) ?></small></p>
                                                     </div>
-
                                                     <h6>IT Head's Response (from <?= htmlspecialchars($response['sender']) ?>):</h6>
                                                     <div class="card bg-light p-3 mb-3">
                                                         <?= nl2br(htmlspecialchars($response['message'])) ?>
@@ -483,7 +469,6 @@ $conn->close();
             </div>
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {

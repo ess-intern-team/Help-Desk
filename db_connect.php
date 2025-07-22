@@ -6,7 +6,7 @@
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', ''); // IMPORTANT: Use a strong password in production!
-define('DB_NAME', 'helpdesks_db'); // Make sure this matches your database name
+define('DB_NAME', 'helpdesk_db'); // Make sure this matches your database name
 
 /**
  * Establishes and returns a database connection.
