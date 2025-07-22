@@ -1,11 +1,7 @@
 <?php
-// ithead.php
-session_start(); // Ensure session is started for authentication
-
-// Assuming db_connect.php provides a getDbConnection() function
+session_start();
 require_once 'db_connect.php';
 
-// --- Helper Functions (Ensuring they are defined before first use) ---
 function redirect($page, $params = [])
 {
     $url = $page;
@@ -39,11 +35,9 @@ function displayMessage()
                 var toastEl = document.querySelector('.toast');
                 if (toastEl) {
                     setTimeout(function() {
-                        var toast = bootstrap.Toast.getInstance(toastEl);
-                        if (toast) {
-                            toast.hide();
-                        }
-                    }, 5000); // Hide after 5 seconds
+                        var toast = bootstrap.Toast.getInstance(toastEl) || new bootstrap.Toast(toastEl);
+                        toast.hide();
+                    }, 5000);
                 }
             });
         </script>";
@@ -52,38 +46,30 @@ function displayMessage()
 
 function requireLogin($requiredRole = null)
 {
-    // If not logged in at all, redirect to login page
     if (!isset($_SESSION['user_id']) || !isset($_SESSION['username']) || !isset($_SESSION['role'])) {
         $_SESSION['displayMessage'] = "You must be logged in to access this page.";
         $_SESSION['messageType'] = "danger";
-        redirect('login.php'); // Assuming login.php handles initial login
+        redirect('login.php');
     }
-
-    // If logged in but role doesn't match required role, redirect to index or an error page
     if ($requiredRole && $_SESSION['role'] !== $requiredRole) {
         $_SESSION['displayMessage'] = "You do not have permission to access this page. Your role: " . ucfirst($_SESSION['role']);
         $_SESSION['messageType'] = "danger";
-        redirect('index.php'); // Redirect to a general dashboard or login
+        redirect('index.php');
     }
 }
-// --- End Helper Functions ---
 
-
-requireLogin('ithead'); // Ensure only IT Heads can access
-
+requireLogin('ithead');
 $currentUser = $_SESSION['username'];
 $currentRole = $_SESSION['role'];
+$conn = getDbConnection();
 
-$conn = getDbConnection(); // Get the database connection
+error_log("IT Head session started for user: $currentUser, role: $currentRole");
+displayMessage();
 
-// Handle Messages from Session (PRG pattern)
-displayMessage(); // Use the helper function
-
-// Handle Form Submission (Respond to Employee or Forward to Specialist)
+// Handle Form Submission (Respond or Forward)
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     try {
         if (isset($_POST['submit_response'])) {
-            // Validate inputs for response
             $requiredFields = ['ticket_id', 'receiver', 'message'];
             foreach ($requiredFields as $field) {
                 if (empty($_POST[$field])) {
@@ -91,30 +77,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
             }
 
-            $ticketId = (int)$_POST['ticket_id']; // This is the ID of the employee's original ticket
-            $receiver = htmlspecialchars($_POST['receiver']); // This is the employee's username
+            $ticketId = (int)$_POST['ticket_id'];
+            $receiver = htmlspecialchars($_POST['receiver']);
             $message = htmlspecialchars($_POST['message']);
 
-            // Get original employee ticket details to use for the response's title, category, priority
-            $sql = "SELECT category, priority, title FROM messages WHERE id = ? AND sender = ? AND role_from = 'employee' AND role_to = 'ithead'";
+            $sql = "SELECT category, priority, title, sender FROM messages WHERE id = ? AND role_from = 'employee' AND role_to = 'ithead'";
             $stmt = $conn->prepare($sql);
             if (!$stmt) {
                 throw new Exception("Database error preparing statement for original ticket: " . $conn->error);
             }
-            $stmt->bind_param("is", $ticketId, $receiver); // Ensure it's the correct original ticket from the correct employee
+            $stmt->bind_param("i", $ticketId);
             $stmt->execute();
             $result = $stmt->get_result();
             $originalEmployeeTicket = $result->fetch_assoc();
             $stmt->close();
 
-            if (!$originalEmployeeTicket) {
-                throw new Exception("Original employee ticket not found or invalid. Cannot respond.");
+            if (!$originalEmployeeTicket || $originalEmployeeTicket['sender'] !== $receiver) {
+                throw new Exception("Invalid ticket or receiver.");
             }
 
             $responseTitle = "Re: " . $originalEmployeeTicket['title'];
             $category = $originalEmployeeTicket['category'];
             $priority = $originalEmployeeTicket['priority'];
-            $parentId = $ticketId; // The IT Head's response links back to the original employee ticket
+            $parentId = $ticketId;
 
             $sql = "INSERT INTO messages (sender, receiver, role_from, role_to, title, message, category, priority, parent_id, status)
                     VALUES (?, ?, 'ithead', 'employee', ?, ?, ?, ?, ?, 'responded')";
@@ -123,24 +108,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 throw new Exception("Database error preparing response statement: " . $conn->error);
             }
             $stmt->bind_param("ssssssi", $currentUser, $receiver, $responseTitle, $message, $category, $priority, $parentId);
-
             if ($stmt->execute()) {
-                // Update original employee ticket status to 'responded'
                 $updateSql = "UPDATE messages SET status = 'responded' WHERE id = ?";
                 $updateStmt = $conn->prepare($updateSql);
                 $updateStmt->bind_param("i", $ticketId);
                 $updateStmt->execute();
                 $updateStmt->close();
-
+                error_log("Response sent by $currentUser to $receiver for ticket #$ticketId");
                 $_SESSION['displayMessage'] = "Response sent to " . htmlspecialchars($receiver) . " successfully!";
                 $_SESSION['messageType'] = "success";
             } else {
                 throw new Exception("Failed to send response: " . $stmt->error);
             }
             $stmt->close();
-            redirect('ithead.php'); // PRG pattern
+            redirect('ithead.php');
         } elseif (isset($_POST['submit_forward'])) {
-            // Validate inputs for forwarding
             $requiredFields = ['ticket_id', 'specialist_receiver', 'forward_message'];
             foreach ($requiredFields as $field) {
                 if (empty($_POST[$field])) {
@@ -148,11 +130,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
             }
 
-            $ticketId = (int)$_POST['ticket_id']; // This is the ID of the employee's original ticket
+            $ticketId = (int)$_POST['ticket_id'];
             $specialistReceiver = htmlspecialchars($_POST['specialist_receiver']);
             $forwardMessage = htmlspecialchars($_POST['forward_message']);
 
-            // Get original employee ticket details for forwarding
+            // Log input values for debugging
+            error_log("Forward attempt: ticket_id=$ticketId, specialist_receiver=$specialistReceiver, forward_message=" . substr($forwardMessage, 0, 50) . "...");
+
+            // Verify specialist exists
+            $sql = "SELECT username, specialization FROM users WHERE role = 'specialist' AND username = ?";
+            $stmt = $conn->prepare($sql);
+            if (!$stmt) {
+                throw new Exception("Database error verifying specialist: " . $conn->error);
+            }
+            $stmt->bind_param("s", $specialistReceiver);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows === 0) {
+                throw new Exception("Selected specialist '$specialistReceiver' does not exist in users table.");
+            }
+            $specialist = $result->fetch_assoc();
+            $specialistSpecialization = $specialist['specialization'] ?? 'unknown';
+            $stmt->close();
+
             $sql = "SELECT sender, title, message, category, priority FROM messages WHERE id = ? AND role_from = 'employee' AND role_to = 'ithead'";
             $stmt = $conn->prepare($sql);
             if (!$stmt) {
@@ -165,18 +165,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->close();
 
             if (!$originalEmployeeTicket) {
-                throw new Exception("Original employee ticket not found or cannot be forwarded.");
+                throw new Exception("Original employee ticket #$ticketId not found.");
             }
 
             $forwardTitle = "FW: " . $originalEmployeeTicket['title'];
             $forwardedMessageContent = "Original Sender: " . $originalEmployeeTicket['sender'] . "\n"
                 . "Original Message:\n" . $originalEmployeeTicket['message'] . "\n\n"
                 . "IT Head's Note:\n" . $forwardMessage;
-
-            // Use the original category and priority for the forwarded ticket
             $category = $originalEmployeeTicket['category'];
             $priority = $originalEmployeeTicket['priority'];
-            $parentId = $ticketId; // The forwarded message links back to the original employee ticket
+            $parentId = $ticketId;
+
+            // Log the values being inserted
+            error_log("Inserting forwarded ticket: sender=$currentUser, receiver=$specialistReceiver, role_from=ithead, role_to=specialist, title=$forwardTitle, category=$category, priority=$priority, parent_id=$parentId, status=forwarded");
 
             $sql = "INSERT INTO messages (sender, receiver, role_from, role_to, title, message, category, priority, parent_id, status)
                     VALUES (?, ?, 'ithead', 'specialist', ?, ?, ?, ?, ?, 'forwarded')";
@@ -185,43 +186,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 throw new Exception("Database error preparing forward statement: " . $conn->error);
             }
             $stmt->bind_param("ssssssi", $currentUser, $specialistReceiver, $forwardTitle, $forwardedMessageContent, $category, $priority, $parentId);
-
             if ($stmt->execute()) {
-                // Update original employee ticket status to 'forwarded'
+                $newTicketId = $conn->insert_id;
                 $updateSql = "UPDATE messages SET status = 'forwarded' WHERE id = ?";
                 $updateStmt = $conn->prepare($updateSql);
                 $updateStmt->bind_param("i", $ticketId);
                 $updateStmt->execute();
                 $updateStmt->close();
-
-                $_SESSION['displayMessage'] = "Ticket #" . $ticketId . " forwarded to " . htmlspecialchars($specialistReceiver) . " successfully!";
+                error_log("Ticket #$ticketId forwarded by $currentUser to $specialistReceiver ($specialistSpecialization specialist, new message ID: $newTicketId)");
+                $_SESSION['displayMessage'] = "Ticket #$ticketId forwarded to " . htmlspecialchars($specialistReceiver) . " ($specialistSpecialization specialist) successfully!";
                 $_SESSION['messageType'] = "success";
             } else {
                 throw new Exception("Failed to forward ticket: " . $stmt->error);
             }
             $stmt->close();
-            redirect('ithead.php'); // PRG pattern
+            redirect('ithead.php');
         }
     } catch (Exception $e) {
-        error_log("IT Head action error for " . $currentUser . ": " . $e->getMessage());
+        error_log("IT Head action error for $currentUser: " . $e->getMessage());
         $_SESSION['displayMessage'] = $e->getMessage();
         $_SESSION['messageType'] = "danger";
-        redirect('ithead.php'); // Redirect with error message
+        redirect('ithead.php');
     }
 }
 
-// Fetch Tickets from Employees (initial tickets directed to this IT Head)
+// Fetch Tickets from Employees
 $employeeTickets = [];
-$sql = "SELECT m.*,
-            emp.username as employee_name,
-            -- Check for specialist response to this specific employee ticket
-            specialist_resp.message as specialist_response_message,
-            specialist_resp.sent_at as specialist_response_sent_at,
-            specialist_resp.sender as specialist_response_sender
-        FROM messages m
-        JOIN users emp ON m.sender = emp.username AND emp.role = 'employee'
-        LEFT JOIN messages specialist_resp ON m.id = specialist_resp.parent_id AND specialist_resp.role_from = 'specialist' AND specialist_resp.role_to = 'ithead'
-        WHERE m.receiver = ? AND m.role_to = 'ithead' AND m.parent_id IS NULL -- Only original employee tickets directed to this IT Head
+$sql = "SELECT m.* FROM messages m
+        WHERE m.receiver = ? AND m.role_from = 'employee' AND m.role_to = 'ithead' AND m.parent_id IS NULL
         ORDER BY m.sent_at DESC";
 $stmt = $conn->prepare($sql);
 if ($stmt) {
@@ -233,10 +225,10 @@ if ($stmt) {
     }
     $stmt->close();
 } else {
-    error_log("Error fetching employee tickets for IT Head " . $currentUser . ": " . $conn->error);
+    error_log("Error fetching employee tickets for IT Head $currentUser: " . $conn->error);
 }
 
-// Fetch Responses from Specialists (where specialist sent to THIS IT Head)
+// Fetch Responses from Specialists
 $specialistResponses = [];
 $sql = "SELECT m.*,
             original_emp_ticket.sender as original_employee_sender,
@@ -257,19 +249,20 @@ if ($stmt) {
     }
     $stmt->close();
 } else {
-    error_log("Error fetching specialist responses for IT Head " . $currentUser . ": " . $conn->error);
+    error_log("Error fetching specialist responses for IT Head $currentUser: " . $conn->error);
 }
 
-// Fetch a list of specialists for forwarding (assuming 'specialist' is a role in your users table)
+// Fetch Specialists with their specializations
 $specialists = [];
-$sql = "SELECT username FROM users WHERE role = 'specialist' ORDER BY username ASC";
+$sql = "SELECT username, specialization FROM users WHERE role = 'specialist' ORDER BY specialization, username ASC";
 $result = $conn->query($sql);
 if ($result) {
     while ($row = $result->fetch_assoc()) {
-        $specialists[] = $row['username'];
+        $specialists[] = $row;
+        error_log("Found specialist: {$row['username']} ({$row['specialization']})");
     }
 } else {
-    error_log("Error fetching specialists for IT Head " . $currentUser . ": " . $conn->error);
+    error_log("Error fetching specialists for IT Head $currentUser: " . $conn->error);
 }
 
 $conn->close();
@@ -359,9 +352,7 @@ $conn->close();
         <div class="row justify-content-center">
             <div class="col-lg-10">
                 <div class="text-center mb-5">
-                    <h1 class="display-5 fw-bold text-info">
-                        <i class="bi bi-briefcase-fill"></i> IT Head Portal
-                    </h1>
+                    <h1 class="display-5 fw-bold text-info"><i class="bi bi-briefcase-fill"></i> IT Head Portal</h1>
                     <p class="lead">Welcome, <?= htmlspecialchars($currentUser) ?> (<?= ucfirst($currentRole) ?>)</p>
                     <a href="logout.php" class="btn btn-outline-danger btn-sm">Logout</a>
                 </div>
@@ -422,14 +413,12 @@ $conn->close();
                                                     <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewEmployeeTicketModal<?= $ticket['id'] ?>">
                                                         <i class="bi bi-eye"></i> View
                                                     </button>
-                                                    <?php if ($ticket['status'] !== 'responded'): // Can always forward, but only respond once to the direct ticket unless it's a follow-up. For simplicity, prevent multiple direct responses to same 'open' ticket. 
-                                                    ?>
+                                                    <?php if ($ticket['status'] !== 'responded' && $ticket['status'] !== 'closed'): ?>
                                                         <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#respondEmployeeModal<?= $ticket['id'] ?>">
                                                             <i class="bi bi-reply"></i> Respond
                                                         </button>
                                                     <?php endif; ?>
-                                                    <?php if ($ticket['status'] !== 'forwarded'): // Can't forward if already forwarded 
-                                                    ?>
+                                                    <?php if ($ticket['status'] !== 'forwarded' && $ticket['status'] !== 'closed'): ?>
                                                         <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#forwardSpecialistModal<?= $ticket['id'] ?>">
                                                             <i class="bi bi-share"></i> Forward
                                                         </button>
@@ -462,16 +451,6 @@ $conn->close();
                                                             <div class="card bg-light p-3 mb-3">
                                                                 <?= nl2br(htmlspecialchars($ticket['message'])) ?>
                                                             </div>
-
-                                                            <?php if (!empty($ticket['specialist_response_message'])): ?>
-                                                                <h6>Specialist Response (from <?= htmlspecialchars($ticket['specialist_response_sender']) ?> on <?= date('M j, Y \a\t g:i a', strtotime($ticket['specialist_response_sent_at'])) ?>):</h6>
-                                                                <div class="card bg-light p-3">
-                                                                    <?= nl2br(htmlspecialchars($ticket['specialist_response_message'])) ?>
-                                                                </div>
-                                                            <?php else: ?>
-                                                                <div class="alert alert-info">No specialist response yet for this ticket.</div>
-                                                            <?php endif; ?>
-
                                                             <p class="text-muted mt-3"><small>Submitted on <?= date('F j, Y \a\t g:i a', strtotime($ticket['sent_at'])) ?></small></p>
                                                         </div>
                                                         <div class="modal-footer">
@@ -492,7 +471,6 @@ $conn->close();
                                                             <div class="modal-body">
                                                                 <input type="hidden" name="ticket_id" value="<?= $ticket['id'] ?>">
                                                                 <input type="hidden" name="receiver" value="<?= htmlspecialchars($ticket['sender']) ?>">
-
                                                                 <div class="original-message-card mb-4">
                                                                     <h6>Original Ticket from <?= htmlspecialchars($ticket['sender']) ?>:</h6>
                                                                     <p><strong><?= htmlspecialchars($ticket['title']) ?></strong></p>
@@ -501,10 +479,9 @@ $conn->close();
                                                                     </div>
                                                                     <p class="text-muted"><small>Submitted on <?= date('F j, Y \a\t g:i a', strtotime($ticket['sent_at'])) ?></small></p>
                                                                 </div>
-
                                                                 <div class="mb-3">
                                                                     <label for="message<?= $ticket['id'] ?>" class="form-label">Your Response to Employee</label>
-                                                                    <textarea class="form-control" id="message<?= $ticket['id'] ?>" name="message" rows="5" placeholder="Enter your detailed response to the employee..." required></textarea>
+                                                                    <textarea class="form-control" id="message<?= $ticket['id'] ?>" name="message" rows="5" placeholder="Enter your detailed response..." required></textarea>
                                                                 </div>
                                                             </div>
                                                             <div class="modal-footer">
@@ -528,7 +505,6 @@ $conn->close();
                                                             </div>
                                                             <div class="modal-body">
                                                                 <input type="hidden" name="ticket_id" value="<?= $ticket['id'] ?>">
-
                                                                 <div class="original-message-card mb-4">
                                                                     <h6>Original Ticket from <?= htmlspecialchars($ticket['sender']) ?>:</h6>
                                                                     <p><strong><?= htmlspecialchars($ticket['title']) ?></strong></p>
@@ -537,13 +513,14 @@ $conn->close();
                                                                     </div>
                                                                     <p class="text-muted"><small>Submitted on <?= date('F j, Y \a\t g:i a', strtotime($ticket['sent_at'])) ?></small></p>
                                                                 </div>
-
                                                                 <div class="mb-3">
                                                                     <label for="specialist_receiver<?= $ticket['id'] ?>" class="form-label">Forward to Specialist</label>
                                                                     <select class="form-select" id="specialist_receiver<?= $ticket['id'] ?>" name="specialist_receiver" required>
                                                                         <option value="">Select Specialist</option>
                                                                         <?php foreach ($specialists as $specialist): ?>
-                                                                            <option value="<?= htmlspecialchars($specialist) ?>"><?= htmlspecialchars($specialist) ?></option>
+                                                                            <option value="<?= htmlspecialchars($specialist['username']) ?>">
+                                                                                <?= htmlspecialchars($specialist['username']) ?> (<?= ucfirst($specialist['specialization']) ?> Specialist)
+                                                                            </option>
                                                                         <?php endforeach; ?>
                                                                         <?php if (empty($specialists)): ?>
                                                                             <option value="" disabled>No specialists found</option>
@@ -552,7 +529,7 @@ $conn->close();
                                                                 </div>
                                                                 <div class="mb-3">
                                                                     <label for="forward_message<?= $ticket['id'] ?>" class="form-label">Note for Specialist</label>
-                                                                    <textarea class="form-control" id="forward_message<?= $ticket['id'] ?>" name="forward_message" rows="4" placeholder="Add any specific instructions or context for the specialist..." required></textarea>
+                                                                    <textarea class="form-control" id="forward_message<?= $ticket['id'] ?>" name="forward_message" rows="4" placeholder="Add instructions for the specialist..." required></textarea>
                                                                 </div>
                                                             </div>
                                                             <div class="modal-footer">
@@ -617,7 +594,6 @@ $conn->close();
                                                             <?= nl2br(htmlspecialchars($response['original_employee_message'])) ?>
                                                         </div>
                                                     </div>
-
                                                     <h6>Specialist's Response (from <?= htmlspecialchars($response['sender']) ?>):</h6>
                                                     <div class="card bg-light p-3 mb-3">
                                                         <?= nl2br(htmlspecialchars($response['message'])) ?>
@@ -638,7 +614,6 @@ $conn->close();
             </div>
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
